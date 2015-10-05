@@ -13,8 +13,6 @@ CYAN='\e[36m'
 WHITE='\e[37m'
 RESETCOLORS='\e[0m'
 
-UNDERLINE_START='\e[4m'
-UNDERLINE_STOP='\e[4m'
 
 echo -e "${YELLOW}SMW Android build script${RESETCOLORS}"
 
@@ -22,7 +20,6 @@ echo -e "${YELLOW}SMW Android build script${RESETCOLORS}"
 echo -e "\n${YELLOW}Checking environment${RESETCOLORS}"
 notfound=0
 echo -en "- ${BLUE}android:${RESETCOLORS} "; which android || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
-echo -en "- ${BLUE}adb:${RESETCOLORS} "; which adb || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
 echo -en "- ${BLUE}android api-15:${RESETCOLORS} "
     { android list target --compact | grep -xq android-15 && echo "installed"; } || { echo -e "${RED}not installed${RESETCOLORS}"; notfound=1; }
 echo -en "- ${BLUE}ndk-build:${RESETCOLORS} "; which ndk-build || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
