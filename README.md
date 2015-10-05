@@ -3,7 +3,7 @@ SMW on Android
 
 This repository contains build scripts and makefiles for the Android port of [Super Mario War](https://github.com/mmatyas/supermariowar).
 
-This port is currently experimental and not ready to play. The game currently requires at least Android 4.0.3 (API 15), and uses SDL2.
+This port is experimental and not yet ready to play. The game currently requires at least Android 4.0.3 (API 15), and uses SDL2.
 
 ## Requirements
 
