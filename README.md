@@ -10,6 +10,7 @@ This port is currently experimental and not ready to play. The game currently re
 - Android [SDK](https://developer.android.com/sdk/index.html#Other) and [NDK](https://developer.android.com/ndk/index.html), preferably the latest available. Make sure `android` and `ndk-build` is in your `PATH`.
 - Android 4.0.3 (API 15) SDK platform (you can install it with `android`)
 - Ant (eg. `sudo apt-get install ant`)
+- Mercurial (eg. `sudo apt-get install mercurial`), used for pulling SDL sources
 
 ## Building instructions
 
