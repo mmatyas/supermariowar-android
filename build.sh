@@ -17,6 +17,8 @@ RESETCOLORS='\e[0m'
 echo -e "${YELLOW}SMW Android build script${RESETCOLORS}"
 
 
+# Testing environment
+#
 echo -e "\n${YELLOW}Checking environment${RESETCOLORS}"
 notfound=0
 echo -en "- ${BLUE}android:${RESETCOLORS} "; which android || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
@@ -28,18 +30,29 @@ echo -en "- ${BLUE}hg:${RESETCOLORS} "; which hg || { echo -e "${RED}not found${
 if [ $notfound -ne 0 ]; then exit 1; fi
 
 
+# Pulling base files
+#
 echo -e "\n${YELLOW}Preparing build directory${RESETCOLORS}"
 if [ -e "android-project" ]; then
     echo -e "${RED}error${RESETCOLORS}: The 'android-project' directory already exists, delete it manually"
     exit 1
 fi
+
 echo -en "- ${BLUE}pulling SMW${RESETCOLORS}\n"
-if [ -e "supermariowar" ]; then rm -rf supermariowar; fi
+if [ -e "supermariowar" ]; then
+    rm -rf supermariowar
+fi
 git clone --recursive --depth=1 https://github.com/mmatyas/supermariowar.git
+
 echo -en "- ${BLUE}pulling SDL2${RESETCOLORS}\n"
-if [ -e "SDL2" ]; then rm -rf SDL2; fi
+if [ -e "SDL2" ]; then
+    rm -rf SDL2
+fi
 hg clone http://hg.libsdl.org/SDL SDL2
 
+
+# Setting up build directory
+#
 echo -en "- ${BLUE}setting up basic directory structure${RESETCOLORS}\n"
 set -o xtrace
 cp -R SDL2/android-project ./
@@ -52,6 +65,9 @@ echo -en "- ${BLUE}pulling SDL2 image and mixer${RESETCOLORS}\n"
 hg clone http://hg.libsdl.org/SDL_image jni/SDL2_image
 hg clone http://hg.libsdl.org/SDL_mixer jni/SDL2_mixer
 
+
+# Setting up SMW files
+#
 echo -en "- ${BLUE}setting up the project${RESETCOLORS}\n"
 set -o xtrace
 # top level settings
@@ -76,6 +92,9 @@ cp ../custom_files/jni/yaml-cpp.mk jni/yaml-cpp-noboost/Android.mk
 cp ../custom_files/jni/smw.mk jni/src/Android.mk
 set +o xtrace
 
+
+# Build!
+#
 echo -e "\n${YELLOW}Building${RESETCOLORS}"
 ndk-build -j$(nproc)
 ant debug
