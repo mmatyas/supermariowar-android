@@ -17,9 +17,38 @@ RESETCOLORS='\e[0m'
 echo -e "${YELLOW}SMW Android build script${RESETCOLORS}"
 
 
+# Read command line parameters
+#
+CONFIG_ABI='all'
+CONFIG_DEBUG=0
+
+for opt in "$@"; do
+case $opt in
+    --abi=*)
+        CONFIG_ABI="${opt#*=}"
+        shift
+    ;;
+    --debug)
+        CONFIG_DEBUG=1
+        shift
+    ;;
+    *) # unknown option
+    ;;
+esac
+done
+
+
 # Testing environment
 #
 echo -e "\n${YELLOW}Checking environment${RESETCOLORS}"
+
+echo -e "- ${BLUE}target archs:${RESETCOLORS} ${CONFIG_ABI}"
+echo -en "- ${BLUE}build mode:${RESETCOLORS} "
+if [ $CONFIG_DEBUG -eq 1 ]; then
+    echo "debug"
+else
+    echo "release"
+fi
 notfound=0
 echo -en "- ${BLUE}android:${RESETCOLORS} "; which android || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
 echo -en "- ${BLUE}android api-15:${RESETCOLORS} "
@@ -70,9 +99,14 @@ hg clone http://hg.libsdl.org/SDL_mixer jni/SDL2_mixer
 #
 echo -en "- ${BLUE}setting up the project${RESETCOLORS}\n"
 set -o xtrace
+
 # top level settings
 android update project --name supermariowar --path . --target android-15
 cp ../custom_files/AndroidManifest.xml ./
+if [ $CONFIG_DEBUG -eq 1 ]; then
+    sed -i 's/<application/<application android:debuggable="true"/' AndroidManifest.xml
+fi
+
 # SDLActivity
 mkdir -p src/net/smwstuff/supermariowar
 cp ../custom_files/MainActivity.java ./src/net/smwstuff/supermariowar/
@@ -90,6 +124,12 @@ cp ../custom_files/jni/enet.mk jni/enet/Android.mk
 cp ../custom_files/jni/lz4.mk jni/lz4/Android.mk
 cp ../custom_files/jni/yaml-cpp.mk jni/yaml-cpp-noboost/Android.mk
 cp ../custom_files/jni/smw.mk jni/src/Android.mk
+
+# custom config
+sed -i "s/APP_ABI := all/APP_ABI := $CONFIG_ABI/" jni/Application.mk
+if [ $CONFIG_DEBUG -eq 1 ]; then
+    sed -i 's/ -O3 / -g /g' jni/src/Android.mk
+fi
 set +o xtrace
 
 
