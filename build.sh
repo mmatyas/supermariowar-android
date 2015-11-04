@@ -68,6 +68,7 @@ echo -en "- ${BLUE}android api-15:${RESETCOLORS} "
 echo -en "- ${BLUE}ndk-build:${RESETCOLORS} "; which ndk-build || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
 echo -en "- ${BLUE}ant:${RESETCOLORS} "; which ant || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
 echo -en "- ${BLUE}hg:${RESETCOLORS} "; which hg || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
+echo -en "- ${BLUE}git:${RESETCOLORS} "; which git || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
 if [ $notfound -ne 0 ]; then exit 1; fi
 
 

@@ -11,6 +11,7 @@ This port is experimental and not yet ready to play. The game currently requires
 - Android 4.0.3 (API 15) SDK platform (you can install it with `android`)
 - Ant (eg. `sudo apt-get install ant`)
 - Mercurial (eg. `sudo apt-get install mercurial`), used for pulling SDL sources
+- Git (eg. `sudo apt-get install git`)
 
 ## Building instructions
 
