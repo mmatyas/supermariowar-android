@@ -32,6 +32,18 @@ case $opt in
         CONFIG_DEBUG=1
         shift
     ;;
+    --help)
+        echo -e "\nUsage: $0 [options]"
+        echo "Options:"
+        echo "  --debug          Build in debug mode instead of release"
+        echo "                   Adds 'android:debuggable=true' to manifest"
+        echo "                   and '-g' to compiler flags"
+        echo "  --abi=ABILIST    Build for selected Android ABIs instead of 'all'"
+        echo "                   Example: --abi='armeabi x86'"
+        echo "                   See the NDK docs for supported values"
+        echo -e "  --help           Display this information\n"
+        exit
+    ;;
     *) # unknown option
     ;;
 esac
