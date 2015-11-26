@@ -80,17 +80,23 @@ if [ -e "android-project" ]; then
     exit 1
 fi
 
-echo -en "- ${BLUE}pulling SMW${RESETCOLORS}\n"
-if [ -e "supermariowar" ]; then
+echo -en "- ${BLUE}checking SMW... "
+if [ ! -d "supermariowar" ]; then
+    echo -en "pulling${RESETCOLORS}\n"
     rm -rf supermariowar
+    git clone --recursive --depth=1 https://github.com/mmatyas/supermariowar.git
+else
+    echo -en "found${RESETCOLORS}\n"
 fi
-git clone --recursive --depth=1 https://github.com/mmatyas/supermariowar.git
 
-echo -en "- ${BLUE}pulling SDL2${RESETCOLORS}\n"
-if [ -e "SDL2" ]; then
+echo -en "- ${BLUE}checking SDL2... "
+if [ ! -d "SDL2" ]; then
+    echo -en "pulling${RESETCOLORS}\n"
     rm -rf SDL2
+    hg clone http://hg.libsdl.org/SDL SDL2
+else
+    echo -en "found${RESETCOLORS}\n"
 fi
-hg clone http://hg.libsdl.org/SDL SDL2
 
 
 # Setting up build directory
@@ -99,7 +105,7 @@ echo -en "- ${BLUE}setting up basic directory structure${RESETCOLORS}\n"
 set -o xtrace
 cp -R SDL2/android-project ./
 mkdir -p android-project/jni
-mv SDL2 android-project/jni/
+cp -R SDL2 android-project/jni/
 set +o xtrace
 
 cd android-project
@@ -124,8 +130,8 @@ fi
 mkdir -p src/net/smwstuff/supermariowar
 cp ../custom_files/MainActivity.java ./src/net/smwstuff/supermariowar/
 # dependencies
-mv ../supermariowar/dependencies/* jni/
-mv ../supermariowar/src/{common,common_netplay,smw} jni/src/
+cp -R ../supermariowar/dependencies/* jni/
+cp -R ../supermariowar/src/{common,common_netplay,smw} jni/src/
 # unnecessary files
 rm jni/src/common/savepng.cpp
 rm jni/src/smw/menu/MenuTemplate.cpp
