@@ -10,8 +10,8 @@ This port is experimental and not yet ready to play. The game currently requires
 - Android [SDK](https://developer.android.com/sdk/index.html#Other) and [NDK](https://developer.android.com/ndk/index.html), preferably the latest available. Make sure `android` and `ndk-build` is in your `PATH`.
 - Android 4.0.3 (API 15) SDK platform (you can install it with `android`)
 - Ant (eg. `sudo apt-get install ant`)
-- Mercurial (eg. `sudo apt-get install mercurial`), used for pulling SDL sources
 - Git (eg. `sudo apt-get install git`)
+- wget (most likely you already have it), for pulling SDL2 sources
 
 ## Building instructions
 

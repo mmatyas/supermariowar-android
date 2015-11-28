@@ -67,8 +67,8 @@ echo -en "- ${BLUE}android api-15:${RESETCOLORS} "
     { android list target --compact | grep -xq android-15 && echo "installed"; } || { echo -e "${RED}not installed${RESETCOLORS}"; notfound=1; }
 echo -en "- ${BLUE}ndk-build:${RESETCOLORS} "; which ndk-build || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
 echo -en "- ${BLUE}ant:${RESETCOLORS} "; which ant || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
-echo -en "- ${BLUE}hg:${RESETCOLORS} "; which hg || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
 echo -en "- ${BLUE}git:${RESETCOLORS} "; which git || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
+echo -en "- ${BLUE}wget:${RESETCOLORS} "; which wget || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
 if [ $notfound -ne 0 ]; then exit 1; fi
 
 
@@ -80,43 +80,66 @@ if [ -e "android-project" ]; then
     exit 1
 fi
 
+# Pull SMW
 echo -en "- ${BLUE}checking SMW... "
 if [ ! -d "supermariowar" ]; then
-    echo -en "pulling${RESETCOLORS}\n"
+    echo -e "cloning${RESETCOLORS}"
     rm -rf supermariowar
     git clone --recursive --depth=1 https://github.com/mmatyas/supermariowar.git
 else
-    echo -en "found${RESETCOLORS}\n"
+    echo -e "ok${RESETCOLORS}"
 fi
 
-echo -en "- ${BLUE}checking SDL2... "
-if [ ! -d "SDL2" ]; then
-    echo -en "pulling${RESETCOLORS}\n"
-    rm -rf SDL2
-    hg clone http://hg.libsdl.org/SDL SDL2
+# Download SDL2
+echo -e "- ${BLUE}checking SDL2${RESETCOLORS}"
+if [ ! -f "SDL2.tar.gz" ] && [ ! -d "SDL2" ]; then
+    echo -e "  - ${BLUE}pulling core${RESETCOLORS}"
+    wget https://hg.libsdl.org/SDL/archive/tip.tar.gz -O SDL2.tar.gz
 else
-    echo -en "found${RESETCOLORS}\n"
+    echo -e "  - ${BLUE}core ok${RESETCOLORS}"
+fi
+# Extract SDL2
+if [ ! -d "SDL2" ]; then
+    mkdir SDL2-tmp # in case tar fails
+    tar xzf SDL2.tar.gz -C SDL2-tmp --strip-components=1
+    mv SDL2-tmp SDL2
+fi
+# Download SDL2_image
+if [ ! -f "SDL2_image.tar.gz" ]; then
+    echo -e "  - ${BLUE}pulling image${RESETCOLORS}"
+    wget https://hg.libsdl.org/SDL_image/archive/tip.tar.gz -O SDL2_image.tar.gz
+else
+    echo -e "  - ${BLUE}image ok${RESETCOLORS}"
+fi
+# Download SDL2_mixer
+if [ ! -f "SDL2_mixer.tar.gz" ]; then
+    echo -e "  - ${BLUE}pulling mixer${RESETCOLORS}"
+    wget https://hg.libsdl.org/SDL_mixer/archive/tip.tar.gz -O SDL2_mixer.tar.gz
+else
+    echo -e "  - ${BLUE}mixer ok${RESETCOLORS}"
 fi
 
 
 # Setting up build directory
 #
-echo -en "- ${BLUE}setting up basic directory structure${RESETCOLORS}\n"
+echo -e "- ${BLUE}setting up basic directory structure${RESETCOLORS}"
 set -o xtrace
 cp -R SDL2/android-project ./
 mkdir -p android-project/jni
 cp -R SDL2 android-project/jni/
 set +o xtrace
 
+echo -e "- ${BLUE}pulling SDL2 image and mixer${RESETCOLORS}"
 cd android-project
-echo -en "- ${BLUE}pulling SDL2 image and mixer${RESETCOLORS}\n"
-hg clone http://hg.libsdl.org/SDL_image jni/SDL2_image
-hg clone http://hg.libsdl.org/SDL_mixer jni/SDL2_mixer
+mkdir jni/SDL2_image
+mkdir jni/SDL2_mixer
+tar xzf ../SDL2_image.tar.gz -C jni/SDL2_image --strip-components=1
+tar xzf ../SDL2_mixer.tar.gz -C jni/SDL2_mixer --strip-components=1
 
 
 # Setting up SMW files
 #
-echo -en "- ${BLUE}setting up the project${RESETCOLORS}\n"
+echo -e "- ${BLUE}setting up the project${RESETCOLORS}"
 set -o xtrace
 
 # top level settings
