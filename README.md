@@ -15,4 +15,4 @@ This port is experimental and not yet ready to play. The game currently requires
 
 ## Building instructions
 
-Just run `build.sh`, it will check if the tools are available, pull the SMW source code, get the dependencies, then set up and build the project.
+Just run `build.sh`, it will check if the tools are available, pull the SMW source code, get the dependencies, then set up and build the project. By default, it builds in Release mode for all platform supported by the NDK; use `--help` to see the optional parameters.
