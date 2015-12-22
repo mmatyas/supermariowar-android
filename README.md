@@ -22,7 +22,7 @@ Just run `build.sh`, it will check if the tools are available, pull the SMW sour
 Make sure you've run the build with `--debug`. Connect your Android device, or start the emulator, then
 
 ```
-adb push supermariowar/data /sdcard/supermariowar/
+adb push supermariowar/data /sdcard/supermariowar/data/
 cd android-project
 ant installd
 ndk-gdb --start --verbose
