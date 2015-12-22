@@ -166,6 +166,9 @@ cp ../custom_files/jni/enet.mk jni/enet/Android.mk
 cp ../custom_files/jni/lz4.mk jni/lz4/Android.mk
 cp ../custom_files/jni/yaml-cpp.mk jni/yaml-cpp-noboost/Android.mk
 cp ../custom_files/jni/smw.mk jni/src/Android.mk
+# custom icons and resources
+rm -rf res
+cp -R ../custom_files/res ./
 
 # custom config
 sed -i "s/APP_ABI := all/APP_ABI := $CONFIG_ABI/" jni/Application.mk
