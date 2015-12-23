@@ -40,7 +40,8 @@ case $opt in
         echo "                   and '-g' to compiler flags"
         echo "  --abi=ABILIST    Build for selected Android ABIs instead of 'all'"
         echo "                   Example: --abi='armeabi x86'"
-        echo "                   See the NDK docs for supported values"
+        echo "                   Possible values: armeabi, armeabi-v7a, arm64-v8a,"
+        echo "                                    x86, x86_64, mips, mips64"
         echo -e "  --help           Display this information\n"
         exit
     ;;
