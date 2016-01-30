@@ -9,7 +9,6 @@ public class MainActivity extends SDLActivity {
             "SDL2_image",
             "SDL2_mixer",
             "enet",
-            "lz4",
             "yaml-cpp",
             "main"
         };
