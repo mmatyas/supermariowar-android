@@ -164,7 +164,6 @@ rm -rf jni/src/smw/menu/xbox
 cp ../custom_files/jni/Android.mk jni/
 cp ../custom_files/jni/Application.mk jni/
 cp ../custom_files/jni/enet.mk jni/enet/Android.mk
-cp ../custom_files/jni/yaml-cpp.mk jni/yaml-cpp-noboost/Android.mk
 cp ../custom_files/jni/smw.mk jni/src/Android.mk
 # custom icons and resources
 rm -rf res
