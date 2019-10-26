@@ -76,8 +76,8 @@ if [ $notfound -ne 0 ]; then exit 1; fi
 # Pulling base files
 #
 echo -e "\n${YELLOW}Preparing build directory${RESETCOLORS}"
-if [ -e "android-project" ]; then
-    echo -e "${RED}error${RESETCOLORS}: The 'android-project' directory already exists, delete it manually"
+if [ -e "android-project-ant" ]; then
+    echo -e "${RED}error${RESETCOLORS}: The 'android-project-ant' directory already exists, delete it manually"
     exit 1
 fi
 
@@ -125,13 +125,13 @@ fi
 #
 echo -e "- ${BLUE}setting up basic directory structure${RESETCOLORS}"
 set -o xtrace
-cp -R SDL2/android-project ./
-mkdir -p android-project/jni
-cp -R SDL2 android-project/jni/
+cp -RL SDL2/android-project-ant ./
+mkdir -p android-project-ant/jni
+cp -RL SDL2 android-project-ant/jni/
 set +o xtrace
 
 echo -e "- ${BLUE}pulling SDL2 image and mixer${RESETCOLORS}"
-cd android-project
+cd android-project-ant
 mkdir jni/SDL2_image
 mkdir jni/SDL2_mixer
 tar xzf ../SDL2_image.tar.gz -C jni/SDL2_image --strip-components=1
