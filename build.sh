@@ -95,7 +95,7 @@ fi
 echo -e "- ${BLUE}checking SDL2${RESETCOLORS}"
 if [ ! -f "SDL2.tar.gz" ] && [ ! -d "SDL2" ]; then
     echo -e "  - ${BLUE}pulling core${RESETCOLORS}"
-    wget https://hg.libsdl.org/SDL/archive/default.tar.gz -O SDL2.tar.gz
+    wget https://www.libsdl.org/release/SDL2-2.0.5.tar.gz -O SDL2.tar.gz
 else
     echo -e "  - ${BLUE}core ok${RESETCOLORS}"
 fi
@@ -108,14 +108,14 @@ fi
 # Download SDL2_image
 if [ ! -f "SDL2_image.tar.gz" ]; then
     echo -e "  - ${BLUE}pulling image${RESETCOLORS}"
-    wget https://hg.libsdl.org/SDL_image/archive/default.tar.gz -O SDL2_image.tar.gz
+    wget https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.1.tar.gz -O SDL2_image.tar.gz
 else
     echo -e "  - ${BLUE}image ok${RESETCOLORS}"
 fi
 # Download SDL2_mixer
 if [ ! -f "SDL2_mixer.tar.gz" ]; then
     echo -e "  - ${BLUE}pulling mixer${RESETCOLORS}"
-    wget https://hg.libsdl.org/SDL_mixer/archive/default.tar.gz -O SDL2_mixer.tar.gz
+    wget https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-2.0.1.tar.gz -O SDL2_mixer.tar.gz
 else
     echo -e "  - ${BLUE}mixer ok${RESETCOLORS}"
 fi
