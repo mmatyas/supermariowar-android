@@ -64,8 +64,8 @@ else
 fi
 notfound=0
 echo -en "- ${BLUE}android:${RESETCOLORS} "; which android || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
-echo -en "- ${BLUE}android api-15:${RESETCOLORS} "
-    { android list target --compact | grep -xq android-15 && echo "installed"; } || { echo -e "${RED}not installed${RESETCOLORS}"; notfound=1; }
+echo -en "- ${BLUE}android api-26:${RESETCOLORS} "
+    { android list target --compact | grep -xq android-26 && echo "installed"; } || { echo -e "${RED}not installed${RESETCOLORS}"; notfound=1; }
 echo -en "- ${BLUE}ndk-build:${RESETCOLORS} "; which ndk-build || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
 echo -en "- ${BLUE}ant:${RESETCOLORS} "; which ant || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
 echo -en "- ${BLUE}git:${RESETCOLORS} "; which git || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
@@ -144,7 +144,7 @@ echo -e "- ${BLUE}setting up the project${RESETCOLORS}"
 set -o xtrace
 
 # top level settings
-android update project --name supermariowar --path . --target android-15
+android update project --name supermariowar --path . --target android-26
 cp ../custom_files/AndroidManifest.xml ./
 if [ $CONFIG_DEBUG -eq 1 ]; then
     sed -i 's/<application/<application android:debuggable="true"/' AndroidManifest.xml
