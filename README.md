@@ -1,37 +1,20 @@
-SMW on Android
-==============
+# Super Mario War for Android
 
-This repository contains build scripts and makefiles for the Android port of [Super Mario War](https://github.com/mmatyas/supermariowar).
+This repository assembles the Android app from SDL3's maintained `android-project` template. `build.sh` copies the template into an ignored build directory, then adds the pinned Super Mario War source, game data, and the small set of Android-specific files under `custom_files`.
 
-This port is experimental and not yet ready to play. The game currently requires at least Android 4.0.3 (API 15), and uses SDL2.
+The pinned game revision provides the SDL3 port and CMake source lists. SDL3 is pinned to release 3.4.8; the game pins SDL3_image 3.4.4 and SDL3_mixer 3.2.2.
 
-## Requirements
+## Build
 
-- Android [SDK](https://developer.android.com/sdk/index.html#Other) and [NDK](https://developer.android.com/ndk/index.html), preferably the latest available. Make sure `android` and `ndk-build` is in your `PATH`.
-- Android 4.0.3 (API 15) SDK platform (you can install it with `android`)
-- Ant (eg. `sudo apt-get install ant`)
-- Git (eg. `sudo apt-get install git`)
-- wget (most likely you already have it), for pulling SDL2 sources
+Install Android SDK platform 35, NDK 29.0.14206865, CMake 3.24 or newer, Ninja, and JDK 17 or newer. Set `ANDROID_HOME` to the SDK directory and put `cmake` on `PATH`. Then initialize submodules:
 
-## Building instructions
-
-Just run `build.sh`, it will check if the tools are available, pull the SMW source code, get the dependencies, then set up and build the project. By default, it builds in Release mode for all platform supported by the NDK; use `--help` to see the optional parameters.
-
-## Debugging
-
-Make sure you've run the build with `--debug`. Connect your Android device, or start the emulator, then
-
-```
-adb push supermariowar/data /sdcard/supermariowar/data/
-cd android-project
-ant installd
-ndk-gdb --start --verbose
+```sh
+git submodule update --init --recursive
+./build.sh --debug
 ```
 
-In some NDK versions you can get errors about a missing gdb.setup file, even in debug build. You can fix this by simply copying or linking the gdb files to `android-project/libs`, eg.:
+The debug APK is `android-project/app/build/outputs/apk/debug/app-debug.apk`. Use `./build.sh` for an unsigned release build; `--abi=arm64-v8a` selects the native ABI and defaults to ARM64. The script stops if `android-project` already exists. Remove that generated directory before another build.
 
-```
-cd libs
-ln -s armeabi/gdbserver
-ln -s armeabi/gdb.setup
-```
+The app targets Android API 35 and retains SDL's API 21 minimum. It packages `game/data` inside the APK and copies it to app-private storage on first launch. Existing installations copy updated packaged assets when the pinned data revision changes. User-created files remain in place.
+
+The debug APK uses the local Android debug signing key and is intended for testing. The game has no Android storage permission or manual `adb push` step.

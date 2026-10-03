@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.24)
+project(SuperMarioWarAndroid LANGUAGES C CXX)
+
+set(NO_NETWORK ON CACHE BOOL "")
+set(BUILD_TESTS OFF CACHE BOOL "")
+set(SMW_INSTALL_PORTABLE ON CACHE BOOL "")
+set(FETCHCONTENT_SOURCE_DIR_SDL3 "${CMAKE_CURRENT_SOURCE_DIR}/SDL" CACHE PATH "")
+add_subdirectory(game)

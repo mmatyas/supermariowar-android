@@ -1,188 +1,48 @@
-#! /bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-set -o nounset
-set -o errexit
+root="$(cd "$(dirname "$0")" && pwd)"
+project="${SMW_BUILD_DIR:-$root/android-project}"
+abi=arm64-v8a
+variant=Release
 
-BLACK='\e[30m'
-RED='\e[31m'
-GREEN='\e[32m'
-YELLOW='\e[33m'
-BLUE='\e[34m'
-MAGENTA='\e[35m'
-CYAN='\e[36m'
-WHITE='\e[37m'
-RESETCOLORS='\e[0m'
-
-
-echo -e "${YELLOW}SMW Android build script${RESETCOLORS}"
-
-
-# Read command line parameters
-#
-CONFIG_ABI='all'
-CONFIG_DEBUG=0
-
-for opt in "$@"; do
-case $opt in
-    --abi=*)
-        CONFIG_ABI="${opt#*=}"
-        shift
-    ;;
-    --debug)
-        CONFIG_DEBUG=1
-        shift
-    ;;
-    --help)
-        echo -e "\nUsage: $0 [options]"
-        echo "Options:"
-        echo "  --debug          Build in debug mode instead of release"
-        echo "                   Adds 'android:debuggable=true' to manifest"
-        echo "                   and '-g' to compiler flags"
-        echo "  --abi=ABILIST    Build for selected Android ABIs instead of 'all'"
-        echo "                   Example: --abi='armeabi x86'"
-        echo "                   Possible values: armeabi, armeabi-v7a, arm64-v8a,"
-        echo "                                    x86, x86_64, mips, mips64"
-        echo -e "  --help           Display this information\n"
-        exit
-    ;;
-    *) # unknown option
-    ;;
-esac
+for option in "$@"; do
+    case "$option" in
+        --abi=*) abi="${option#*=}" ;;
+        --debug) variant=Debug ;;
+        --help)
+            echo "Usage: $0 [--debug] [--abi=arm64-v8a]"
+            exit 0 ;;
+        *) echo "Unknown option: $option" >&2; exit 1 ;;
+    esac
 done
 
-
-# Testing environment
-#
-echo -e "\n${YELLOW}Checking environment${RESETCOLORS}"
-
-echo -e "- ${BLUE}target archs:${RESETCOLORS} ${CONFIG_ABI}"
-echo -en "- ${BLUE}build mode:${RESETCOLORS} "
-if [ $CONFIG_DEBUG -eq 1 ]; then
-    echo "debug"
-else
-    echo "release"
+if [[ ! -f "$root/third_party/SDL/android-project/app/build.gradle" || ! -f "$root/game/CMakeLists.txt" || ! -d "$root/game/data/maps" ]]; then
+    echo "Initialize submodules first: git submodule update --init --recursive" >&2
+    exit 1
 fi
-notfound=0
-echo -en "- ${BLUE}android:${RESETCOLORS} "; which android || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
-echo -en "- ${BLUE}android api-15:${RESETCOLORS} "
-    { android list target --compact | grep -xq android-15 && echo "installed"; } || { echo -e "${RED}not installed${RESETCOLORS}"; notfound=1; }
-echo -en "- ${BLUE}ndk-build:${RESETCOLORS} "; which ndk-build || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
-echo -en "- ${BLUE}ant:${RESETCOLORS} "; which ant || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
-echo -en "- ${BLUE}git:${RESETCOLORS} "; which git || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
-echo -en "- ${BLUE}wget:${RESETCOLORS} "; which wget || { echo -e "${RED}not found${RESETCOLORS}"; notfound=1; }
-if [ $notfound -ne 0 ]; then exit 1; fi
-
-
-# Pulling base files
-#
-echo -e "\n${YELLOW}Preparing build directory${RESETCOLORS}"
-if [ -e "android-project" ]; then
-    echo -e "${RED}error${RESETCOLORS}: The 'android-project' directory already exists, delete it manually"
+if [[ -e "$project" ]]; then
+    echo "Build directory already exists: $project" >&2
     exit 1
 fi
 
-# Pull SMW
-echo -en "- ${BLUE}checking SMW... "
-if [ ! -d "supermariowar" ]; then
-    echo -e "cloning${RESETCOLORS}"
-    rm -rf supermariowar
-    git clone --recursive --depth=1 https://github.com/mmatyas/supermariowar.git
-else
-    echo -e "ok${RESETCOLORS}"
-fi
+cp -R "$root/third_party/SDL/android-project" "$project"
+mkdir -p "$project/app/jni/SDL" "$project/app/jni/game" "$project/app/src/main/assets/data"
+git -C "$root/third_party/SDL" archive HEAD | tar -xf - -C "$project/app/jni/SDL"
+git -C "$root/game" archive HEAD | tar -xf - -C "$project/app/jni/game"
+git -C "$root/game/data" archive HEAD | tar -xf - -C "$project/app/src/main/assets/data"
+git -C "$root/game/data" rev-parse HEAD > "$project/app/src/main/assets/smw-assets-version.txt"
 
-# Download SDL2
-echo -e "- ${BLUE}checking SDL2${RESETCOLORS}"
-if [ ! -f "SDL2.tar.gz" ] && [ ! -d "SDL2" ]; then
-    echo -e "  - ${BLUE}pulling core${RESETCOLORS}"
-    wget https://www.libsdl.org/release/SDL2-2.0.5.tar.gz -O SDL2.tar.gz
-else
-    echo -e "  - ${BLUE}core ok${RESETCOLORS}"
-fi
-# Extract SDL2
-if [ ! -d "SDL2" ]; then
-    mkdir SDL2-tmp # in case tar fails
-    tar xzf SDL2.tar.gz -C SDL2-tmp --strip-components=1
-    mv SDL2-tmp SDL2
-fi
-# Download SDL2_image
-if [ ! -f "SDL2_image.tar.gz" ]; then
-    echo -e "  - ${BLUE}pulling image${RESETCOLORS}"
-    wget https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.1.tar.gz -O SDL2_image.tar.gz
-else
-    echo -e "  - ${BLUE}image ok${RESETCOLORS}"
-fi
-# Download SDL2_mixer
-if [ ! -f "SDL2_mixer.tar.gz" ]; then
-    echo -e "  - ${BLUE}pulling mixer${RESETCOLORS}"
-    wget https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-2.0.1.tar.gz -O SDL2_mixer.tar.gz
-else
-    echo -e "  - ${BLUE}mixer ok${RESETCOLORS}"
-fi
+cp "$root/custom_files/jni/CMakeLists.txt" "$project/app/jni/CMakeLists.txt"
+cp "$root/custom_files/AndroidManifest.xml" "$project/app/src/main/AndroidManifest.xml"
+mkdir -p "$project/app/src/main/java/net/smwstuff/supermariowar"
+cp "$root/custom_files/MainActivity.java" "$project/app/src/main/java/net/smwstuff/supermariowar/MainActivity.java"
+cp "$root/custom_files/GameActivity.java" "$project/app/src/main/java/net/smwstuff/supermariowar/GameActivity.java"
+cp "$root/custom_files/game.gradle" "$project/app/game.gradle"
+cp -R "$root/custom_files/res/." "$project/app/src/main/res/"
+echo "apply from: 'game.gradle'" >> "$project/app/build.gradle"
+cmake_bin="$(command -v cmake)"
+printf 'cmake.dir=%s\n' "$(dirname "$(dirname "$cmake_bin")")" > "$project/local.properties"
 
-
-# Setting up build directory
-#
-echo -e "- ${BLUE}setting up basic directory structure${RESETCOLORS}"
-set -o xtrace
-cp -R SDL2/android-project ./
-mkdir -p android-project/jni
-cp -R SDL2 android-project/jni/
-set +o xtrace
-
-echo -e "- ${BLUE}pulling SDL2 image and mixer${RESETCOLORS}"
-cd android-project
-mkdir jni/SDL2_image
-mkdir jni/SDL2_mixer
-tar xzf ../SDL2_image.tar.gz -C jni/SDL2_image --strip-components=1
-tar xzf ../SDL2_mixer.tar.gz -C jni/SDL2_mixer --strip-components=1
-
-
-# Setting up SMW files
-#
-echo -e "- ${BLUE}setting up the project${RESETCOLORS}"
-set -o xtrace
-
-# top level settings
-android update project --name supermariowar --path . --target android-15
-cp ../custom_files/AndroidManifest.xml ./
-if [ $CONFIG_DEBUG -eq 1 ]; then
-    sed -i 's/<application/<application android:debuggable="true"/' AndroidManifest.xml
-fi
-
-# SDLActivity
-mkdir -p src/net/smwstuff/supermariowar
-cp ../custom_files/MainActivity.java ./src/net/smwstuff/supermariowar/
-# dependencies
-cp -R ../supermariowar/dependencies/* jni/
-cp -R ../supermariowar/src/{common,common_netplay,smw} jni/src/
-# unnecessary files
-rm jni/src/common/savepng.cpp
-rm jni/src/smw/menu/MenuTemplate.cpp
-rm -rf jni/src/smw/menu/xbox
-# custom makefiles
-cp ../custom_files/jni/Android.mk jni/
-cp ../custom_files/jni/Application.mk jni/
-cp ../custom_files/jni/enet.mk jni/enet/Android.mk
-cp ../custom_files/jni/yaml-cpp.mk jni/yaml-cpp-noboost/Android.mk
-cp ../custom_files/jni/smw.mk jni/src/Android.mk
-# custom icons and resources
-rm -rf res
-cp -R ../custom_files/res ./
-
-# custom config
-sed -i "s/APP_ABI := all/APP_ABI := $CONFIG_ABI/" jni/Application.mk
-if [ $CONFIG_DEBUG -eq 1 ]; then
-    sed -i 's/ -O3 / -g /g' jni/src/Android.mk
-fi
-set +o xtrace
-
-
-# Build!
-#
-echo -e "\n${YELLOW}Building${RESETCOLORS}"
-ndk-build -j$(nproc)
-ant debug
-ant release
-
-echo -e "\n${YELLOW}Done!${RESETCOLORS}"
+cd "$project"
+./gradlew -PBUILD_WITH_CMAKE "-PSMW_ABI=$abi" "assemble$variant"

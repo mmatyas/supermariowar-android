@@ -1,0 +1,21 @@
+android {
+    namespace 'net.smwstuff.supermariowar'
+    ndkVersion '29.0.14206865'
+    defaultConfig {
+        applicationId 'net.smwstuff.supermariowar'
+        minSdkVersion 21
+        targetSdkVersion 35
+        versionCode 5
+        versionName '2.0-android-sdl3-preview'
+        externalNativeBuild {
+            cmake {
+                abiFilters.clear()
+                abiFilters project.findProperty('SMW_ABI') ?: 'arm64-v8a'
+                targets 'smw'
+            }
+        }
+    }
+    packagingOptions {
+        jniLibs.useLegacyPackaging = false
+    }
+}
